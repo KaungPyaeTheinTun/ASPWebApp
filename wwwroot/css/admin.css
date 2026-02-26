@@ -1,0 +1,12 @@
+#admin-container {
+    display: flex;
+}
+
+#admin-container nav {
+    flex-shrink: 0;
+}
+
+#admin-container .flex-grow-1 {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}

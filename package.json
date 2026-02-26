@@ -1,0 +1,25 @@
+{
+  "dependencies": {
+    "datatables.net-dt": "^2.3.7",
+    "jquery": "^4.0.0"
+  },
+  "name": "aspwebapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KaungPyaeTheinTun/ASPWebApp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/KaungPyaeTheinTun/ASPWebApp/issues"
+  },
+  "homepage": "https://github.com/KaungPyaeTheinTun/ASPWebApp#readme"
+}

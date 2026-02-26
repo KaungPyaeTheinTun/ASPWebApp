@@ -1,0 +1,55 @@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+    var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var username = HttpContextAccessor.HttpContext?.Session?.GetString("UserName");
+    var UserEmail = HttpContextAccessor.HttpContext?.Session?.GetString("UserEmail");
+}
+
+<header>
+        <nav class="navbar fixed-top navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow">        <div class="container-fluid">
+            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ASPWebApp</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+                    aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between" id="navbarCollapse">
+                <ul class="navbar-nav flex-grow-1">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(currentController == "Home" && currentAction == "Index" ? "active fw-bold" : "")" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(currentController == "Home" && currentAction == "About" ? "active fw-bold" : "")" asp-controller="Home" asp-action="About">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(currentController == "Home" && currentAction == "Contact" ? "active fw-bold" : "")" asp-controller="Home" asp-action="Contact">Contact</a>
+                    </li>
+                </ul>
+                
+                <!-- Login and Register Buttons -->
+                <div class="d-flex align-items-center">
+                    @if (string.IsNullOrEmpty(UserEmail))
+                    {
+                        <a class="btn btn-outline-primary me-2" asp-controller="Auth" asp-action="Login">Login</a>
+                        <a class="btn btn-outline-primary" asp-controller="Auth" asp-action="Register">Register</a>
+                    }
+                    else
+                    {
+                       <div class="dropdown-container">
+                        <button class="user-toggle btn btn-outline-secondary">
+                            @UserEmail
+                        </button>
+                        <div class="dropdown-content">
+                            <form method="post" asp-controller="Auth" asp-action="Logout">
+                                <button type="submit" class="dropdown-item">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>

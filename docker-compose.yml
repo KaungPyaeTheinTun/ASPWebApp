@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/azure-sql-edge
+    container_name: sqlserver
+    environment:
+      - ACCEPT_EULA=1
+      - MSSQL_SA_PASSWORD=Kptt@081355
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Kptt@081355 -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  aspnetapp:
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    container_name: aspnetapp
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - keys:/root/.aspnet/DataProtection-Keys
+    command: dotnet watch run --urls "http://0.0.0.0:5000"
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_USE_POLLING_FILE_WATCHER=1
+      - DOTNET_WATCH_RESTART_ON_RUDE_EDIT=1
+      - ASPNETCORE_DETAILEDERRORS=true
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=DotNetDB;User=sa;Password=Kptt@081355;TrustServerCertificate=True
+    ports:
+      - "8080:5000" # host 8080 -> container 5000
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - aspnetapp
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+
+volumes:
+  sql_data:
+  keys:

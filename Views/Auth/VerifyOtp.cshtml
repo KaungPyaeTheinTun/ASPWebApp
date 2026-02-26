@@ -1,0 +1,267 @@
+@{
+    ViewData["Title"] = "Verify OTP";
+}
+@model ASPWebApp.ViewModels.VerifyOtpViewModel
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <h2>Verify OTP</h2>
+                        <p class="text-muted">Enter the 6-digit code sent to your device</p>
+                    </div>
+                    
+                    <form method="post" asp-controller="Auth" asp-action="VerifyOtp" id="otpForm">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <!-- Hidden input to store combined OTP value -->
+                        <input type="hidden" asp-for="OTP" id="otpHidden" />
+                        
+                        <!-- 6-digit OTP Input Boxes -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Verification Code</label>
+                            <div class="d-flex gap-2 justify-content-between" id="otpContainer">
+                                @for (int i = 0; i < 6; i++)
+                                {
+                                    <input type="text" 
+                                           class="form-control form-control-lg text-center fw-bold otp-input" 
+                                           maxlength="1" 
+                                           inputmode="numeric"
+                                           pattern="[0-9]*"
+                                           data-index="@i"
+                                           style="width: 3.5rem; font-size: 1.5rem; border-radius: 12px; border: 2px solid #e9ecef; background-color: #f8f9fa;"
+                                           required>
+                                }
+                            </div>
+                            <span asp-validation-for="OTP" class="text-danger small"></span>
+                        </div>
+                        
+                        <!-- Timer and Resend Section -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="text-muted small">
+                                <i class="bi bi-clock"></i> Code expires in 
+                                <span id="timer" class="fw-bold text-primary">02:00</span>
+                            </div>
+                            
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill" id="verifyBtn">
+                                <span class="me-2">Verify & Continue</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Back Option -->
+                        <div class="text-center">
+                            <a asp-controller="Auth" asp-action="Login" class="text-decoration-none small">
+                                <i class="bi bi-chevron-left"></i> Back to login
+                            </a>
+                        </div>
+                    </form>
+                    <form method="post" asp-controller="Auth" asp-action="ResendOtp" class="d-inline">
+                                <button type="submit" class="btn btn-link text-decoration-none p-0" id="resendBtn" disabled>
+                                    Resend Code
+                                </button>
+                            </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        (function() {
+            'use strict';
+            
+            const otpInputs = document.querySelectorAll('.otp-input');
+            const otpHidden = document.getElementById('otpHidden');
+            const verifyBtn = document.getElementById('verifyBtn');
+            const resendBtn = document.getElementById('resendBtn');
+            
+            // Timer functionality
+            let timeLeft = 120; // 2 minutes in seconds
+            const timerElement = document.getElementById('timer');
+            
+            function updateTimer() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerElement.textContent = '00:00';
+                    resendBtn.disabled = false;
+                    resendBtn.classList.add('text-primary');
+                } else {
+                    timeLeft--;
+                }
+            }
+            
+            const timerInterval = setInterval(updateTimer, 1000);
+            
+            // Resend code functionality
+            resendBtn.addEventListener('click', function() {
+                this.disabled = true;
+                this.classList.remove('text-primary');
+                timeLeft = 120;
+                timerInterval = setInterval(updateTimer, 1000);
+                
+                // Clear OTP inputs
+                otpInputs.forEach(input => {
+                    input.value = '';
+                    input.classList.remove('border-primary');
+                });
+                otpInputs[0].focus();
+                
+                // Here you can add your resend API call
+                console.log('Resending OTP...');
+            });
+            
+            // Handle OTP input
+            function handleOtpInput(e) {
+                const input = e.target;
+                const value = input.value;
+                const index = parseInt(input.dataset.index);
+                
+                // Only allow numbers
+                if (value && !/^\d+$/.test(value)) {
+                    input.value = '';
+                    return;
+                }
+                
+                // Auto-focus next input
+                if (value && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+                
+                // Update hidden input with all OTP values
+                updateHiddenOtp();
+            }
+            
+            // Handle backspace key
+            function handleOtpKeydown(e) {
+                const input = e.target;
+                const index = parseInt(input.dataset.index);
+                
+                if (e.key === 'Backspace' && !input.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            }
+            
+            // Handle paste event
+            function handleOtpPaste(e) {
+                e.preventDefault();
+                const paste = e.clipboardData.getData('text');
+                const numbers = paste.replace(/\D/g, '').split('');
+                
+                if (numbers.length >= 6) {
+                    otpInputs.forEach((input, i) => {
+                        input.value = numbers[i] || '';
+                    });
+                    otpInputs[5].focus();
+                    updateHiddenOtp();
+                }
+            }
+            
+            // Update hidden input with combined OTP
+            function updateHiddenOtp() {
+                let otpValue = '';
+                otpInputs.forEach(input => {
+                    otpValue += input.value;
+                });
+                otpHidden.value = otpValue;
+                
+                // Enable/disable verify button based on OTP length
+                if (otpValue.length === 6) {
+                    verifyBtn.classList.remove('disabled');
+                    verifyBtn.disabled = false;
+                } else {
+                    verifyBtn.classList.add('disabled');
+                    verifyBtn.disabled = true;
+                }
+            }
+            
+            // Add event listeners to all OTP inputs
+            otpInputs.forEach(input => {
+                input.addEventListener('input', handleOtpInput);
+                input.addEventListener('keydown', handleOtpKeydown);
+                input.addEventListener('paste', handleOtpPaste);
+                
+                // Style on focus
+                input.addEventListener('focus', function() {
+                    this.classList.add('border-primary');
+                    this.style.boxShadow = '0 0 0 0.25rem rgba(13, 110, 253, 0.1)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.classList.remove('border-primary');
+                    this.style.boxShadow = 'none';
+                });
+            });
+            
+            // Initial focus
+            otpInputs[0]?.focus();
+            
+            // Form validation
+            document.getElementById('otpForm').addEventListener('submit', function(e) {
+                const otpValue = otpHidden.value;
+                if (otpValue.length !== 6) {
+                    e.preventDefault();
+                    alert('Please enter complete 6-digit OTP code');
+                }
+            });
+            
+            // Disable verify button initially
+            verifyBtn.classList.add('disabled');
+            verifyBtn.disabled = true;
+            
+        })();
+    </script>
+}
+
+<style>
+    .otp-input:focus {
+        outline: none;
+        background-color: white;
+    }
+    
+    .otp-input:hover {
+        border-color: #86b7fe;
+        background-color: white;
+    }
+    
+    @@media (max-width: 576px) {
+        .otp-input {
+            width: 2.8rem !important;
+            height: 2.8rem;
+            font-size: 1.2rem !important;
+        }
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+    }
+    
+    .btn-link {
+        color: #6c757d;
+        transition: color 0.3s ease;
+    }
+    
+    .btn-link:not(:disabled):hover {
+        color: #0d6efd;
+    }
+</style>

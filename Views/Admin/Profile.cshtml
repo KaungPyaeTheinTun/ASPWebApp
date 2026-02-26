@@ -1,0 +1,592 @@
+@model ASPWebApp.ViewModels.AdminProfileViewModel
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Admin Profile";
+}
+
+<style>
+
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.07);
+        --glass-border: rgba(255, 255, 255, 0.14);
+        --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+        --accent-blue: #2563eb;
+        --accent-blue-hover: #1d4ed8;
+        --accent-blue-glow: rgba(37, 99, 235, 0.35);
+        --text-primary: #000000;
+        --text-secondary: rgba(1, 0, 0, 0.5);
+        --input-bg: rgba(255, 255, 255, 0.05);
+        --input-border: rgba(8, 0, 0, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+        .profile-scene {
+        min-height: 100vh;
+        padding: 2.5rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-scene::before {
+        content: '';
+        position: fixed;
+        top: -20%; left: -10%;
+        width: 600px; height: 600px;
+        background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+        pointer-events: none;
+        animation: orbFloat 9s ease-in-out infinite;
+    }
+    .profile-scene::after {
+        content: '';
+        position: fixed;
+        bottom: -15%; right: -5%;
+        width: 500px; height: 500px;
+        background: radial-gradient(circle, rgba(37,99,235,0.07) 0%, transparent 70%);
+        pointer-events: none;
+        animation: orbFloat 11s ease-in-out infinite reverse;
+    }
+
+    @@keyframes orbFloat {
+        0%, 100% { transform: translate(0,0) scale(1); }
+        50%       { transform: translate(25px,-18px) scale(1.04); }
+    }
+
+    .profile-layout {
+        max-width: 980px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(24px) saturate(160%);
+        -webkit-backdrop-filter: blur(24px) saturate(160%);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.07);
+        color: var(--text-primary);
+    }
+
+    /* ── Left panel ── */
+    .left-panel {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        animation: slideInLeft 0.55s cubic-bezier(0.16,1,0.3,1) both;
+        min-height: 460px;
+        border-radius: 24px;
+    }
+
+    @@keyframes slideInLeft {
+        from { opacity:0; transform:translateX(-28px); }
+        to   { opacity:1; transform:translateX(0); }
+    }
+
+    /* Full cover profile image */
+    .profile-cover-img {
+        position: absolute;
+        inset: 0;
+        width: 100%; height: 100%;
+        object-fit: cover;
+        object-position: center top;
+        display: block;
+        border-radius: 24px;
+    }
+
+    /* Gradient overlay — top: transparent, bottom: dark then blue */
+    .profile-cover-overlay {
+        position: absolute;
+        inset: 0;
+        border-radius: 24px;
+        background: linear-gradient(
+            to bottom,
+            transparent 30%,
+            rgba(0,0,0,0.3) 55%,
+            rgba(10,10,10,0.75) 70%,
+            #0f172a 100%
+        );
+        pointer-events: none;
+    }
+
+    /* Bottom info section sits over the overlay */
+    .profile-info-bottom {
+        position: relative;
+        z-index: 2;
+        margin-top: auto;
+        padding: 1.5rem 1.4rem 1.4rem;
+    }
+
+    .profile-name-row {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 0.35rem;
+    }
+
+    .profile-name {
+        font-size: 1.3rem; font-weight: 700;
+        color: #ffffff; line-height: 1.2;
+    }
+
+    .verified-icon {
+        flex-shrink: 0;
+        width: 20px; height: 20px;
+        background: var(--accent-blue);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .verified-icon svg { width: 11px; height: 11px; }
+
+    .profile-role {
+        font-size: 0.84rem;
+        color: rgba(255,255,255,0.65);
+        font-weight: 300;
+        line-height: 1.5;
+        margin-bottom: 1.1rem;
+    }
+
+    .profile-email-pill {
+        margin-right: auto;
+        font-size: 1rem;
+        color: white;
+        font-weight: 400;
+        white-space: nowrap;
+        /* overflow: hidden; */
+        text-overflow: ellipsis;
+        max-width: 130px;
+    }
+
+    /* ── Right panel ── */
+    .right-panel {
+        display:flex; flex-direction:column; gap:1.25rem;
+        animation:slideInRight 0.55s cubic-bezier(0.16,1,0.3,1) 0.08s both;
+    }
+
+    @@keyframes slideInRight {
+        from { opacity:0; transform:translateX(28px); }
+        to   { opacity:1; transform:translateX(0); }
+    }
+
+    .section-card { padding:1.75rem 2rem; }
+
+    .section-title {
+        font-size:1.67rem; font-weight:600;
+        letter-spacing:0.01em;
+        color:black;
+        margin-bottom:1.25rem;
+        display:flex; align-items:center;
+    }
+    .section-title::after {
+        content:''; flex:1; height:1px;
+        background:linear-gradient(90deg, rgba(255,255,255,0.1), transparent);
+    }
+
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .form-field { display:flex; flex-direction:column; gap:6px; }
+    .form-field.full { grid-column:1/-1; }
+
+    .form-label {
+        font-size:0.9rem; font-weight:500;
+        letter-spacing:0.07em; 
+        color:black;
+    }
+
+    .form-input {
+        background:var(--input-bg);
+        border:1px solid var(--input-border);
+        border-radius:10px;
+        color:black;
+        font-size:0.9rem;
+        padding:0.65rem 0.9rem;
+        transition:border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        outline:none; width:100%;
+    }
+    .form-input::placeholder { color:black; }
+    .form-input:focus {
+        border-color:rgba(37,99,235,0.7);
+        background:rgba(37,99,235,0.05);
+        box-shadow:0 0 0 3px rgba(37,99,235,0.15);
+    }
+
+    .file-label {
+        display:flex; align-items:center; gap:10px;
+        background:var(--input-bg);
+        border:2px dashed rgba(0, 0, 0, 0.12);
+        border-radius:10px;
+        padding:0.65rem 0.9rem;
+        cursor:pointer;
+        transition:border-color 0.2s, background 0.2s;
+        color:rgba(0, 0, 0, 0.35); font-size:0.85rem;
+    }
+    .file-label:hover {
+        border-color:rgba(37,99,235,0.5);
+        background:rgba(37,99,235,0.04);
+        color:black;
+    }
+    .file-label svg { flex-shrink:0; }
+    input[type="file"] { display:none; }
+
+    /* ── Buttons ── */
+    .btn-primary {
+        display:inline-flex; align-items:center; gap:7px;
+        background:var(--accent-blue);
+        color:white;
+        font-size:0.82rem; font-weight:600; letter-spacing:0.02em;
+        padding:0.65rem 1.4rem;
+        border-radius:10px; border:none; cursor:pointer;
+        transition:background 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+    .btn-primary:hover {
+        background:var(--accent-blue-hover);
+        transform:translateY(-2px);
+    }
+    .btn-primary:active { transform:translateY(0); }
+
+    .btn-outline-blue {
+        display:inline-flex; align-items:center; gap:7px;
+        background:transparent;
+        color:black;
+        font-size:0.82rem; font-weight:600; letter-spacing:0.02em;
+        padding:0.65rem 1.4rem;
+        border-radius:10px;
+        border:1px solid rgba(96,165,250,0.4);
+        cursor:pointer;
+        transition:background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+    .btn-outline-blue:hover {
+        background:rgba(16, 83, 228, 0.1);
+        border-color:rgba(96,165,250,0.7);
+        transform:translateY(-1px);
+    }
+
+    .btn-ghost {
+        background:rgba(255,255,255,0.05);
+        border:1px solid rgba(255,255,255,0.1);
+        color:black;
+        font-size:0.82rem; font-weight:500;
+        padding:0.65rem 1.2rem;
+        border-radius:10px; cursor:pointer;
+        transition:background 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover {
+        background:rgba(255,255,255,0.09);
+        color:black;
+    }
+
+    .btn-row { display:flex; gap:0.75rem; margin-top:1.25rem; }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+        position:fixed; inset:0; z-index:100;
+        display:flex; align-items:center; justify-content:center;
+        background:rgba(0,0,0,0.8);
+        backdrop-filter:blur(8px);
+        opacity:0; pointer-events:none;
+        transition:opacity 0.3s;
+    }
+    .modal-backdrop.open { opacity:1; pointer-events:all; }
+
+    .modal-box {
+        background:rgba(254, 254, 254, 0.95);
+        backdrop-filter:blur(30px);
+        border:1px solid rgba(255,255,255,0.1);
+        border-radius:24px;
+        box-shadow:0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+        width:100%; max-width:440px;
+        padding:2rem; position:relative;
+        transform:scale(0.94) translateY(10px);
+        opacity:0;
+        transition:transform 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.3s;
+        color:var(--text-primary);
+    }
+    .modal-backdrop.open .modal-box { transform:scale(1) translateY(0); opacity:1; }
+
+    .modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+
+    .modal-title {
+        font-size:1.1rem; font-weight:700; color:black;
+    }
+
+    .modal-close {
+        background:rgba(255,255,255,0.06);
+        border:1px solid rgba(255,255,255,0.1);
+        color:black;
+        width:30px; height:30px; border-radius:8px;
+        display:flex; align-items:center; justify-content:center;
+        cursor:pointer; font-size:1.15rem;
+        transition:background 0.2s, color 0.2s; line-height:1;
+    }
+    .modal-close:hover { background:rgba(255,255,255,0.12); color:#fff; }
+
+    .pw-wrapper { position:relative; }
+    .pw-toggle {
+        position:absolute; inset-y:0; right:0.75rem;
+        display:flex; align-items:center;
+        background:none; border:none; cursor:pointer;
+        color:black; transition:color 0.2s; padding:0;
+    }
+    .pw-toggle:hover { color:black; }
+
+    .modal-fields { display:flex; flex-direction:column; gap:1rem; }
+    .modal-footer { display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem; }
+
+    @@media (max-width:700px) {
+        .profile-layout { grid-template-columns:1fr; }
+        .form-grid { grid-template-columns:1fr; }
+    }
+</style>
+
+<div class="profile-scene">
+    <div class="profile-layout">
+
+        <!-- ══ LEFT PANEL ══ -->
+        <div class="glass-card left-panel">
+            @if (!string.IsNullOrEmpty(Model.CurrentImagePath))
+            {
+                <img src="@Model.CurrentImagePath" alt="Profile" class="profile-cover-img" />
+            }
+            else
+            {
+                <img src="/images/_.jpeg" alt="Profile" class="profile-cover-img" />
+            }
+            <div class="profile-cover-overlay"></div>
+            <div class="profile-info-bottom">
+                <div class="profile-name-row">
+                    <span class="profile-name">@Model.Name</span>
+                    <span class="verified-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="profile-role">Administrator &middot; System Access</div>
+                <div class="profile-stats-row">
+                    <div class="profile-email-pill">@Model.Email</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ RIGHT PANEL ══ -->
+        <div class="right-panel">
+
+            <div class="glass-card section-card">
+                <div class="section-title">Profile Infodddrmation</div>
+                <form method="post" enctype="multipart/form-data">
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="form-label" for="Name">Name</label>
+                            <input asp-for="Name" id="Name" class="form-input" placeholder="Your full name" />
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label" for="Email">Email</label>
+                            <input asp-for="Email" id="Email" class="form-input" placeholder="your@email.com" />
+                        </div>
+                        <div class="form-field full">
+                            <label class="form-label">Profile Image</label>
+                            <label class="file-label" for="ProfileImageFile">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span id="file-name-label">Click to upload a new image…</span>
+                            </label>
+                            <input asp-for="ProfileImageFile" type="file" id="ProfileImageFile" accept="image/*"
+                                   onchange="document.getElementById('file-name-label').textContent = this.files[0]?.name || 'Click to upload a new image…'" />
+                        </div>
+                    </div>
+                    <div class="btn-row">
+                        <button type="submit" class="btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Save Changes
+                        </button>
+                        <a asp-controller="Backend" asp-action="Index" class="btn-primary" style="background:gray; text-decoration:none;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="glass-card section-card">
+                <div class="section-title">Security</div>
+                <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.65; margin-bottom:1rem;">
+                    Keep your account safe by using a strong, unique password. We recommend updating it regularly.
+                </p>
+                <button type="button" onclick="openPasswordModal()" class="btn-outline-blue">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Change Password
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="password-modal"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 
+            opacity-0 pointer-events-none transition-opacity duration-300">
+
+    <div id="modal-box"
+         class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative
+                scale-95 opacity-0 transition-all duration-300">
+
+        <button type="button"
+                onclick="closePasswordModal()"
+                class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">
+            &times;
+        </button>
+
+        <h3 class="text-xl font-bold mb-3">Change Password</h3>
+
+        <form method="post" asp-action="ChangePassword">
+            <div class="space-y-4">
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Current Password</label>
+                    <div class="relative mt-1">
+                        <input type="password" id="CurrentPassword" asp-for="Password.CurrentPassword"
+                               class="w-full border rounded px-3 py-2 pr-10" />
+                        <button type="button" onclick="togglePassword('CurrentPassword', 'eye-current')"
+                                class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700">
+                            <svg id="eye-current" xmlns="http://www.w3.org/2000/svg"
+                                 class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7
+                                         -1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">New Password</label>
+                    <div class="relative mt-1">
+                        <input type="password" id="NewPassword" asp-for="Password.NewPassword"
+                               class="w-full border rounded px-3 py-2 pr-10" />
+                        <button type="button" onclick="togglePassword('NewPassword', 'eye-new')"
+                                class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700">
+                            <svg id="eye-new" xmlns="http://www.w3.org/2000/svg"
+                                 class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7
+                                         -1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                    <div class="relative mt-1">
+                        <input type="password" id="ConfirmPassword" asp-for="Password.ConfirmPassword"
+                               class="w-full border rounded px-3 py-2 pr-10" />
+                        <button type="button" onclick="togglePassword('ConfirmPassword', 'eye-confirm')"
+                                class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700">
+                            <svg id="eye-confirm" xmlns="http://www.w3.org/2000/svg"
+                                 class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7
+                                         -1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" onclick="closePasswordModal()"
+                        class="px-4 py-2 rounded border text-gray-600 hover:bg-gray-100">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    Change Password
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const modal    = document.getElementById('password-modal');
+    const modalBox = document.getElementById('modal-box');
+
+    function openPasswordModal() {
+        // 1. Make the backdrop visible and allow pointer events
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100');
+
+        // 2. Animate the modal box in (fade + scale up)
+        modalBox.classList.remove('opacity-0', 'scale-95');
+        modalBox.classList.add('opacity-100', 'scale-100');
+
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePasswordModal() {
+        // 1. Animate the modal box out (fade + scale down)
+        modalBox.classList.remove('opacity-100', 'scale-100');
+        modalBox.classList.add('opacity-0', 'scale-95');
+
+        // 2. After the transition finishes, hide the backdrop
+        setTimeout(() => {
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            document.body.style.overflow = '';
+        }, 300); // match duration-300
+    }
+
+    // Close when clicking the dark backdrop
+    modal.addEventListener('click', function (e) {
+        if (e.target === this) closePasswordModal();
+    });
+
+    // ── Show / hide individual password fields ──────────
+    function togglePassword(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon  = document.getElementById(iconId);
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+
+        if (isPassword) {
+            icon.innerHTML = `
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7
+                         a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243
+                         M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29
+                         m7.532 7.532l3.29 3.29M3 3l3.59 3.59
+                         m0 0A9.953 9.953 0 0112 5c4.477 0 8.268 2.943 9.542 7
+                         a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />`;
+        } else {
+            icon.innerHTML = `
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7
+                         -1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
+        }
+    }
+</script>
+}
+

@@ -1,0 +1,142 @@
+@{
+    ViewData["Title"] = "Register";
+}
+@model ASPWebApp.ViewModels.RegisterViewModel
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="card shadow-lg">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="text-center mb-4">Create Your Account</h2>
+                    
+                    <form method="post" asp-controller="Auth" asp-action="Register">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                            <!-- First Name -->
+                            <div class="mb-3">
+                                <label for="firstName" class="form-label">Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="firstName" asp-for="Name" 
+                                           placeholder="Enter your first name" required>
+                                </div>
+                                <span asp-validation-for="Name"></span>
+                            </div>
+                        
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-envelope-fill"></i>
+                                </span>
+                                <input type="email" class="form-control" id="email" asp-for="Email" 
+                                       placeholder="Enter your email address" required>
+                            </div>
+                            <span asp-validation-for="Email"></span>
+                        </div>
+                        
+                        <div class="row">
+                            <!-- Password -->
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-lock-fill"></i>
+                                    </span>
+                                    <input type="password" class="form-control" id="password" asp-for="Password" 
+                                           placeholder="Create a password" required>
+                                    <button type="button" class="btn btn-outline-secondary toggle-password" data-target="password">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                                <div class="form-text">
+                                    <small>
+                                        <i class="bi bi-check-circle"></i> At least 8 characters<br>
+                                        <i class="bi bi-check-circle"></i> One uppercase letter<br>
+                                        <i class="bi bi-check-circle"></i> One number
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- Confirm Password -->
+                            <div class="col-md-6 mb-3">
+                                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-lock-fill"></i>
+                                    </span>
+                                    <input type="password" class="form-control" id="confirmPassword" asp-for="ConfirmPassword" 
+                                           placeholder="Confirm your password" required>
+                                    <button type="button" class="btn btn-outline-secondary toggle-password" data-target="confirmPassword">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Create Account</button>
+                        </div>
+                        
+                        <!-- Divider -->
+                        <div class="text-center mb-4">
+                            <hr class="my-3">
+                        </div>
+                        
+                        <!-- Login Link -->
+                        <div class="text-center">
+                            <p class="mb-0">Already have an account? 
+                                <a asp-controller="Auth" asp-action="Login" class="text-decoration-underline fw-bold">
+                                    Login here
+                                </a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Toggle password visibility for multiple fields
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.remove('bi-eye-fill');
+                    icon.classList.add('bi-eye-slash-fill');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.remove('bi-eye-slash-fill');
+                    icon.classList.add('bi-eye-fill');
+                }
+            });
+        });
+        
+        // Password match validation
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+        
+        function validatePassword() {
+            if (password.value !== confirmPassword.value) {
+                confirmPassword.setCustomValidity("Passwords don't match");
+            } else {
+                confirmPassword.setCustomValidity('');
+            }
+        }
+        
+        password.onchange = validatePassword;
+        confirmPassword.onkeyup = validatePassword;
+    </script>
+}

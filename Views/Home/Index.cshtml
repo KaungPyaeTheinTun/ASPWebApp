@@ -1,0 +1,9 @@
+﻿@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Home";
+    var username = HttpContextAccessor.HttpContext?.Session?.GetString("UserName");
+}
+
+<div class="text-center">
+    <partial name="~/Views/Home/Components/_HeroSection.cshtml" />
+</div>

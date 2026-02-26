@@ -1,0 +1,281 @@
+<nav class="bg-gray-800 fixed top-0 left-0 right-0 z-50">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex h-16 items-center justify-between">
+      <div class="flex items-center">
+        <div class="shrink-0">
+          <h1 class="navbar-brand text-white">ASPWebApp</h1>
+        </div>
+        <div class="hidden md:block">
+          <div class="ml-10 flex items-baseline space-x-4">
+            <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-white/5 hover:text-white" -->
+            <a asp-controller="Backend" asp-action="index" aria-current="page"
+               class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white">Dashboard</a>
+            
+            <!-- Admin Dropdown -->
+            <div class="relative" id="admin-dropdown-container">
+              <button onclick="toggleDropdown('admin-dropdown')" 
+                      class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white inline-flex items-center gap-1">
+                Admin
+                <svg class="w-4 h-4 transition-transform" id="admin-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              <div id="admin-dropdown" class="hidden absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                <div class="py-1" role="menu">
+                  <a asp-controller="Backend" asp-action="AdminList" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Admin List</a>
+                  <a asp-controller="Backend" asp-action="CreateAdmin" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Create Admin</a>
+                  <a asp-controller="Backend" asp-action="AdminRoles" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Admin Roles</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- User Dropdown -->
+            <div class="relative" id="user-dropdown-container">
+              <button onclick="toggleDropdown('user-dropdown')" 
+                      class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white inline-flex items-center gap-1">
+                User
+                <svg class="w-4 h-4 transition-transform" id="user-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              <div id="user-dropdown" class="hidden absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                <div class="py-1" role="menu">
+                  <a asp-controller="Backend" asp-action="UserList" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">User List</a>
+                  <a asp-controller="Backend" asp-action="CreateUser" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Create User</a>
+                  <a asp-controller="Backend" asp-action="UserRoles" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">User Roles</a>
+                </div>
+              </div>
+            </div>
+
+            <a asp-controller="Backend" asp-action="index"
+               class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Reports</a>
+          </div>
+        </div>
+      </div>
+      <div class="hidden md:block">
+        <div class="ml-4 flex items-center md:ml-6">
+          <button type="button"
+                  class="relative rounded-full p-1 text-gray-400 hover:text-white focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500">
+            <span class="absolute -inset-1.5"></span>
+            <span class="sr-only">View notifications</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon"
+                 aria-hidden="true" class="size-6">
+              <path
+              d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
+              stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+
+          <!-- Profile dropdown -->
+          <div class="relative ml-3" id="profile-dropdown-container">
+            <button onclick="toggleDropdown('profile-dropdown')"
+                    class="relative flex max-w-xs items-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+              <span class="absolute -inset-1.5"></span>
+              <span class="sr-only">Open user menu</span>
+              <img
+                src="@ViewData["ProfileImagePath"]"
+                alt="Profile" 
+                class="size-8 rounded-full outline outline-1 -outline-offset-1 outline-white/10" />
+              <span class="pl-1 text-white">@ViewData["Username"]</span>
+            </button>
+
+            <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+              <!-- Profile -->
+              <a asp-controller="Admin" asp-action="Profile" 
+                 class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <i class="bi bi-person-circle"></i>
+                Profile
+              </a>
+
+              <!-- Logout -->
+              <form method="post" asp-controller="Auth" asp-action="Logout">
+                <button type="submit"
+                        class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <i class="bi bi-box-arrow-right"></i>
+                  Logout
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="-mr-2 flex md:hidden">
+        <!-- Mobile menu button -->
+        <button type="button"
+                  class="relative ml-auto shrink-0 rounded-full p-1 text-gray-400 hover:text-white focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500">
+            <span class="absolute -inset-1.5"></span>
+            <span class="sr-only">View notifications</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon"
+                 aria-hidden="true" class="size-6">
+              <path
+              d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
+              stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </button>
+        <button type="button" onclick="toggleMobileMenu()"
+                class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-white/5 hover:text-white focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500">
+          <span class="absolute -inset-0.5"></span>
+          <span class="sr-only">Open main menu</span>
+          <svg id="menu-open-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon"
+               aria-hidden="true" class="size-6">
+            <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <svg id="menu-close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon"
+               aria-hidden="true" class="size-6 hidden">
+            <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden md:hidden">
+    <div class="space-y-1 px-2 pb-3 pt-2 sm:px-3">
+      <a asp-controller="Backend" asp-action="index" aria-current="page"
+         class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white">Dashboard</a>
+      
+      <!-- Mobile Admin Dropdown -->
+      <div>
+        <button onclick="toggleMobileDropdown('mobile-admin-dropdown', 'mobile-admin-arrow')" 
+                class="w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white flex items-center justify-between">
+          Admin
+          <svg class="w-4 h-4 transition-transform" id="mobile-admin-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div id="mobile-admin-dropdown" class="hidden pl-4 space-y-1">
+          <a asp-controller="Backend" asp-action="AdminList" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Admin List</a>
+          <a asp-controller="Backend" asp-action="CreateAdmin" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Create Admin</a>
+          <a asp-controller="Backend" asp-action="AdminRoles" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Admin Roles</a>
+        </div>
+      </div>
+
+      <!-- Mobile User Dropdown -->
+      <div>
+        <button onclick="toggleMobileDropdown('mobile-user-dropdown', 'mobile-user-arrow')" 
+                class="w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white flex items-center justify-between">
+          User
+          <svg class="w-4 h-4 transition-transform" id="mobile-user-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div id="mobile-user-dropdown" class="hidden pl-4 space-y-1">
+          <a asp-controller="Backend" asp-action="UserList" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">User List</a>
+          <a asp-controller="Backend" asp-action="CreateUser" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Create User</a>
+          <a asp-controller="Backend" asp-action="UserRoles" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">User Roles</a>
+        </div>
+      </div>
+
+      <a asp-controller="Backend" asp-action="Dashboard"
+         class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Reports</a>
+    </div>
+    <div class="border-t border-white/10 pb-3 pt-4">
+      <div class="flex items-center px-5">
+        <div class="ml-3">
+          <div class="text-base/5 font-medium text-white">@ViewData["Username"]</div>
+          <div class="text-sm font-medium text-gray-400">@ViewData["Email"]</div>
+        </div>
+      </div>
+      <div class="mt-3 flex gap-3 space-y-1 px-2">
+        <a asp-controller="Admin" asp-action="Profile"
+           class="block bg-gray-900 rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-white/5 hover:text-white">Profile</a>
+        <form method="post" asp-controller="Auth" asp-action="Logout">
+          <button type="submit"
+                  class="block bg-gray-900 rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-white/5 hover:text-white">Logout</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Add padding to body -->
+<style>
+  body {
+    padding-top: 64px;
+  }
+</style>
+
+<script>
+  // Toggle dropdowns
+  function toggleDropdown(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    const arrow = document.getElementById(dropdownId.replace('dropdown', 'arrow'));
+    
+    // Close all other dropdowns
+    document.querySelectorAll('[id$="dropdown"]').forEach(el => {
+      if (el.id !== dropdownId && !el.id.includes('mobile')) {
+        el.classList.add('hidden');
+      }
+    });
+    
+    // Reset all arrows
+    document.querySelectorAll('[id$="arrow"]').forEach(el => {
+      if (el.id !== (dropdownId.replace('dropdown', 'arrow'))) {
+        el.classList.remove('rotate-180');
+      }
+    });
+    
+    // Toggle current dropdown
+    dropdown.classList.toggle('hidden');
+    if (arrow) {
+      arrow.classList.toggle('rotate-180');
+    }
+  }
+
+  // Toggle mobile dropdowns
+  function toggleMobileDropdown(dropdownId, arrowId) {
+    const dropdown = document.getElementById(dropdownId);
+    const arrow = document.getElementById(arrowId);
+    
+    dropdown.classList.toggle('hidden');
+    if (arrow) {
+      arrow.classList.toggle('rotate-180');
+    }
+  }
+
+  // Toggle mobile menu
+  function toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobile-menu');
+    const openIcon = document.getElementById('menu-open-icon');
+    const closeIcon = document.getElementById('menu-close-icon');
+    
+    mobileMenu.classList.toggle('hidden');
+    openIcon.classList.toggle('hidden');
+    closeIcon.classList.toggle('hidden');
+  }
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', function(event) {
+    const adminContainer = document.getElementById('admin-dropdown-container');
+    const userContainer = document.getElementById('user-dropdown-container');
+    const profileContainer = document.getElementById('profile-dropdown-container');
+    
+    if (adminContainer && !adminContainer.contains(event.target)) {
+      const adminDropdown = document.getElementById('admin-dropdown');
+      const adminArrow = document.getElementById('admin-arrow');
+      if (adminDropdown && !adminDropdown.classList.contains('hidden')) {
+        adminDropdown.classList.add('hidden');
+        if (adminArrow) adminArrow.classList.remove('rotate-180');
+      }
+    }
+    
+    if (userContainer && !userContainer.contains(event.target)) {
+      const userDropdown = document.getElementById('user-dropdown');
+      const userArrow = document.getElementById('user-arrow');
+      if (userDropdown && !userDropdown.classList.contains('hidden')) {
+        userDropdown.classList.add('hidden');
+        if (userArrow) userArrow.classList.remove('rotate-180');
+      }
+    }
+    
+    if (profileContainer && !profileContainer.contains(event.target)) {
+      const profileDropdown = document.getElementById('profile-dropdown');
+      const profileArrow = document.getElementById('profile-arrow');
+      if (profileDropdown && !profileDropdown.classList.contains('hidden')) {
+        profileDropdown.classList.add('hidden');
+        if (profileArrow) profileArrow.classList.remove('rotate-180');
+      }
+    }
+  });
+</script>
