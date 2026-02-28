@@ -11,15 +11,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" />
 </head>
 
 <body>
     <div class="min-h-full">
         <partial name="Partials/_TopBar" />
 
-        <header class="relative bg-white shadow">
-            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                <h1 class="text-3xl font-bold tracking-tight text-gray-900">@ViewData["Title"]</h1>
+        <header class="relative bg-white shadow w-full">
+            <div class="w-full px-4 py-4 sm:max-w-7xl sm:mx-auto sm:px-6 sm:py-6 lg:px-8">
+                <h1 class="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl lg:text-3xl">@ViewData["Title"]</h1>
                 @await Html.PartialAsync("Partials/_Alerts")
             </div>
         </header>

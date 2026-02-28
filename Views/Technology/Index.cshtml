@@ -1,0 +1,221 @@
+@model List<ASPWebApp.Models.Technology>
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Manage Technology";
+}
+
+<style>
+    #techTable,
+    #techTable th,
+    #techTable td {
+        border: none !important;
+        border-top: none !important;
+    }
+
+    #techTable thead tr {
+        border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+    }
+
+    #techTable tbody tr {
+        transition: background 0.15s;
+    }
+
+    #techTable tbody tr:hover {
+        background: rgba(37, 99, 235, 0.04);
+    }
+
+    .table-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    #techTable thead th {
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: #9ca3af;
+        padding: 0.65rem 0.75rem;
+    }
+
+    #techTable tbody td {
+        padding: 0.8rem 0.75rem;
+        vertical-align: middle;
+        font-size: 0.9rem;
+        color: #374151;
+    }
+
+    .desc-cell {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+        /* subtle underline hint */
+        text-underline-offset: 3px;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+</style>
+
+<div class="d-flex flex-column min-vh-100">
+    <main class="flex-fill">
+        <div class="container-fluid px-3 px-md-4 my-4">
+
+            <div class="table-toolbar">
+                <div class="d-flex align-items-center gap-2">
+                    <a href="@Url.Action("Create")" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-plus-circle"></i> Add New Technology
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table id="techTable" class="table table-hover w-100">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>URL</th>
+                            <th>Image</th>
+                            <th>Created At</th>
+                            <th style="width:160px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            int i = 1;
+                            foreach (var tech in Model)
+                            {
+                                <tr>
+                                    <td>@i</td>
+                                    <td>@tech.Name</td>
+                                    <td>
+                                        <span class="desc-cell d-inline-block"
+                                              data-bs-toggle="popover"
+                                              data-bs-trigger="hover focus click"
+                                              data-bs-placement="top"
+                                              data-bs-content="@tech.Description"
+                                              tabindex="0">
+                                            @tech.Description
+                                        </span>
+                                    </td>
+                                    <td>@tech.Category</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(tech.Url))
+                                        {
+                                            <a href="@tech.Url" target="_blank" rel="noopener noreferrer"
+                                            class="text-primary text-decoration-none"
+                                            data-bs-toggle="tooltip" title="@tech.Url">
+                                                <i class="bi bi-box-arrow-up-right me-1"></i>@tech.Name
+                                            </a>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (tech.Media != null)
+                                        {
+                                            <img src="@tech.Media.FilePath" alt="@tech.Name"
+                                                 width="50" height="50"
+                                                 style="border-radius: 0.375rem; object-fit: cover; width: 50px; height: 50px;" />
+                                        }
+                                    </td>
+                                    <td>@tech.CreatedAt.ToString("yyyy-MM-dd")</td>
+                                    <td>
+                                        <a asp-controller="Technology"
+                                           asp-action="Edit"
+                                           asp-route-id="@tech.Id"
+                                           class="btn btn-warning btn-sm me-1"
+                                           data-bs-toggle="tooltip"
+                                           title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+
+                                        <form method="post" asp-controller="Technology" asp-action="Delete"
+                                              asp-route-id="@tech.Id" class="d-inline delete-form">
+                                            <input type="hidden" name="id" value="@tech.Id" />
+                                            <button type="button" class="btn btn-danger btn-sm"
+                                                    data-bs-toggle="tooltip" title="Delete"
+                                                    onclick="showDeleteModal(this.closest('form'))">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                i++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">No technologies found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <partial name="Partials/_DeleteModel" />
+
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#techTable').DataTable({
+                paging: true,
+                lengthChange: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true,
+                pageLength: 10,
+                columnDefs: [
+                    { orderable: false, targets: [4, 6] }
+                ],
+                language: {
+                    paginate: { previous: "<", next: ">" }
+                }
+            });
+
+            // Init tooltips (Edit/Delete buttons)
+            document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+                new bootstrap.Tooltip(el);
+            });
+
+            // Init popovers (Description — works on hover + tap on mobile)
+            document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el => {
+                new bootstrap.Popover(el, {
+                    trigger: 'hover focus click'
+                });
+            });
+
+            // Close popover when tapping outside on mobile
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('[data-bs-toggle="popover"]')) {
+                    document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el => {
+                        bootstrap.Popover.getInstance(el)?.hide();
+                    });
+                }
+            });
+        });
+    </script>
+}

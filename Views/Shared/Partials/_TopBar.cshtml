@@ -47,8 +47,22 @@
               </div>
             </div>
 
-            <a asp-controller="Backend" asp-action="index"
-               class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Reports</a>
+            <!-- Technology Dropdown -->
+            <div class="relative" id="tech-dropdown-container">
+              <button onclick="toggleDropdown('tech-dropdown')" 
+                      class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white inline-flex items-center gap-1">
+                Technology
+                <svg class="w-4 h-4 transition-transform" id="tech-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              <div id="tech-dropdown" class="hidden absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                <div class="py-1" role="menu">
+                  <a asp-controller="Technology" asp-action="Index" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Technologies List</a>
+                  <a asp-controller="Technology" asp-action="Create" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Create Technology</a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -249,6 +263,7 @@
   document.addEventListener('click', function(event) {
     const adminContainer = document.getElementById('admin-dropdown-container');
     const userContainer = document.getElementById('user-dropdown-container');
+    const techContainer = document.getElementById('tech-dropdown-container');
     const profileContainer = document.getElementById('profile-dropdown-container');
     
     if (adminContainer && !adminContainer.contains(event.target)) {
@@ -266,6 +281,15 @@
       if (userDropdown && !userDropdown.classList.contains('hidden')) {
         userDropdown.classList.add('hidden');
         if (userArrow) userArrow.classList.remove('rotate-180');
+      }
+    }
+
+    if (techContainer && !techContainer.contains(event.target)) {
+      const techDropdown = document.getElementById('tech-dropdown');
+      const techArrow = document.getElementById('tech-arrow');
+      if (techDropdown && !techDropdown.classList.contains('hidden')) {
+        techDropdown.classList.add('hidden');
+        if (techArrow) techArrow.classList.remove('rotate-180');
       }
     }
     

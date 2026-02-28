@@ -1,5 +1,13 @@
 # Ignore compiled binaries
 bin/
 obj/
+
 .env
+
 /node_modules
+
+# Ignore uploads folder
+wwwroot/uploads/
+
+# Ignore images folder
+wwwroot/images/

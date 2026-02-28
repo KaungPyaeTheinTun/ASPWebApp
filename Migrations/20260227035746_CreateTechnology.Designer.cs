@@ -4,6 +4,7 @@ using ASPWebApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASPWebApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260227035746_CreateTechnology")]
+    partial class CreateTechnology
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,7 +48,13 @@ namespace ASPWebApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Media");
                 });
@@ -105,9 +114,6 @@ namespace ASPWebApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Url")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("MediaId");
@@ -127,9 +133,6 @@ namespace ASPWebApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("MediaId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -142,8 +145,6 @@ namespace ASPWebApp.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("MediaId");
 
                     b.HasIndex("RoleId");
 
@@ -160,6 +161,17 @@ namespace ASPWebApp.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ASPWebApp.Models.Media", b =>
+                {
+                    b.HasOne("ASPWebApp.Models.User", "User")
+                        .WithOne("ProfileImage")
+                        .HasForeignKey("ASPWebApp.Models.Media", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ASPWebApp.Models.Technology", b =>
                 {
                     b.HasOne("ASPWebApp.Models.Media", "Media")
@@ -171,17 +183,11 @@ namespace ASPWebApp.Migrations
 
             modelBuilder.Entity("ASPWebApp.Models.User", b =>
                 {
-                    b.HasOne("ASPWebApp.Models.Media", "ProfileImage")
-                        .WithMany()
-                        .HasForeignKey("MediaId");
-
                     b.HasOne("ASPWebApp.Models.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("ProfileImage");
 
                     b.Navigation("Role");
                 });
@@ -189,6 +195,11 @@ namespace ASPWebApp.Migrations
             modelBuilder.Entity("ASPWebApp.Models.Role", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("ASPWebApp.Models.User", b =>
+                {
+                    b.Navigation("ProfileImage");
                 });
 #pragma warning restore 612, 618
         }

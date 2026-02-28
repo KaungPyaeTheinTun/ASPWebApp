@@ -10,7 +10,13 @@ namespace ASPWebApp.Controllers
 {
     public class AdminController : BaseController<User>
     {
-        public AdminController(IUserService userService) : base(userService) { }
+        private readonly IMediaService _mediaService;
+
+        public AdminController(IUserService userService, IMediaService mediaService)
+            : base(userService)
+        {
+            _mediaService = mediaService;
+        }
 
         [HttpGet]
         public IActionResult Profile()
@@ -47,42 +53,18 @@ namespace ASPWebApp.Controllers
             user.Email = model.Email;
 
             // Handle Profile Image Upload
-            if (model.ProfileImageFile != null && model.ProfileImageFile.Length > 0)
+            if (model.ProfileImageFile != null)
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(model.ProfileImageFile.FileName)}";
-                var filePath = Path.Combine(uploadsFolder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    model.ProfileImageFile.CopyTo(stream);
-                }
-
                 if (user.ProfileImage == null)
                 {
-                    user.ProfileImage = new Media
-                    {
-                        FileName = fileName,
-                        FilePath = $"/uploads/{fileName}",
-                        ContentType = model.ProfileImageFile.ContentType,
-                        UserId = user.Id,
-                        CreatedAt = DateTime.UtcNow
-                    };
+                    user.ProfileImage = _mediaService.UploadFile(model.ProfileImageFile);
                 }
                 else
                 {
-                    // Optional: delete old file
-                    var oldFile = Path.Combine(uploadsFolder, user.ProfileImage.FileName);
-                    if (System.IO.File.Exists(oldFile))
-                        System.IO.File.Delete(oldFile);
-
-                    user.ProfileImage.FileName = fileName;
-                    user.ProfileImage.FilePath = $"/uploads/{fileName}";
-                    user.ProfileImage.ContentType = model.ProfileImageFile.ContentType;
-                    user.ProfileImage.CreatedAt = DateTime.UtcNow;
+                    user.ProfileImage = _mediaService.UpdateFile(
+                        model.ProfileImageFile,
+                        user.ProfileImage
+                    );
                 }
             }
 

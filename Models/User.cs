@@ -14,6 +14,7 @@ namespace ASPWebApp.Models
 
         public Role? Role { get; set; }
 
+        public int? MediaId { get; set; }
         public Media? ProfileImage { get; set; }
     }
 }

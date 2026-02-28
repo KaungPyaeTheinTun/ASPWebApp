@@ -35,6 +35,9 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped(typeof(BaseInterface<>), typeof(BaseRepository<>));
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<UserInterface, UserRepository>();
+builder.Services.AddScoped<IMediaService, MediaService>();
+builder.Services.AddScoped<ITechnologyRepository, TechnologyRepository>();
+builder.Services.AddScoped<ITechnologyService, TechnologyService>();
 
 var app = builder.Build();
 

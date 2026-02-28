@@ -1,0 +1,361 @@
+
+/* define clean variables (consistent with original) */
+    :root {
+      --surface: #ffffff;
+      --heading: #0b0f14;
+      --text: #1e2a3a;
+      --muted: #5e6f88;
+      --border: #e7ecf2;
+      --accent: #1a7aff;
+      --accent2: #4f9eff;
+    }
+
+    /* footer now naturally stays at bottom because body is flex column */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid whitesmoke;
+      position: relative;      /* keeps blobs contained */
+      overflow: hidden;
+      width: 100%;
+      /* remove min-height: 100% — that was forcing footer to expand unnecessarily */
+    }
+
+    /* decorative gradient blobs (unchanged, but now they don't cause overflow) */
+    footer::before, footer::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;            /* behind content */
+    }
+    footer::before {
+      width: 420px; height: 420px;
+      background: rgba(26,122,255,.07);
+      top: -160px; left: -80px;
+    }
+    footer::after {
+      width: 360px; height: 360px;
+      background: rgba(79,158,255,.06);
+      bottom: -140px; right: -60px;
+    }
+
+    /* make sure inner content sits above blobs */
+    .footer-top, .footer-divider, .footer-bottom {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ── TOP BAND – FULLY RESPONSIVE GRID ────────── */
+    .footer-top {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 64px 32px 48px;
+      display: grid;
+      grid-template-columns: 1.6fr repeat(3, 1fr);
+      gap: 40px 32px;
+    }
+
+    /* tablet breakpoint */
+    @media (max-width: 900px) {
+      .footer-top {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 48px 32px;
+      }
+      .footer-brand {
+        grid-column: 1 / -1;   /* brand takes full width on tablet */
+        max-width: 500px;
+      }
+    }
+
+    /* mobile breakpoint */
+    @media (max-width: 550px) {
+      .footer-top {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        padding: 48px 24px 32px;
+      }
+      .footer-brand {
+        max-width: 100%;
+      }
+    }
+
+    /* brand column */
+    .footer-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      margin-bottom: 18px;
+    }
+    .logo-mark {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 500;
+      color: #0b0f14;
+      letter-spacing: -.5px;
+      flex-shrink: 0;
+    }
+    .logo-name {
+      font-size: 18px;
+      color: var(--heading);
+      letter-spacing: .3px;
+    }
+    .footer-tagline {
+      font-size: 16.5px;
+      line-height: 1.65;
+      color: var(--muted);
+      max-width: 260px;
+      margin-bottom: 24px;
+    }
+
+    /* newsletter */
+    .newsletter-form {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      max-width: 300px;
+      transition: border-color .2s;
+    }
+    .newsletter-form:focus-within {
+      border-color: var(--accent);
+    }
+    .newsletter-form input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 10px 14px;
+      font-size: 16px;
+      color: var(--text);
+    }
+    .newsletter-form input::placeholder { color: var(--muted); }
+    .newsletter-form button {
+      background: linear-gradient(135deg, #1a7aff, #4f9eff);
+      border: none;
+      padding: 0 16px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 500;
+      color: #fff;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      transition: opacity .2s;
+    }
+    .newsletter-form button:hover { opacity: .85; }
+
+    /* nav columns */
+    .footer-col-title {
+      font-size: 16px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 18px;
+    }
+    .footer-col ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .footer-col ul li a {
+      text-decoration: none;
+      font-size: 16.5px;
+      color: var(--muted);
+      transition: color .18s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .footer-col ul li a::before {
+      content: '';
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background .18s;
+      flex-shrink: 0;
+    }
+    .footer-col ul li a:hover { color: var(--heading); }
+    .footer-col ul li a:hover::before { background: var(--accent); }
+
+    /* badge */
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(26,122,255,.12);
+      color: var(--accent);
+      border: 1px solid rgba(26,122,255,.25);
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    /* ── DIVIDER ─────────────────────────────────── */
+    .footer-divider {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+    .footer-divider hr {
+      border: none;
+      border-top: 1px solid whitesmoke;
+    }
+
+    /* ── BOTTOM BAND – FULLY STACKABLE ───────────── */
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px 32px;
+      flex-wrap: wrap;
+    }
+
+    /* mobile bottom stacking */
+    @media (max-width: 700px) {
+      .footer-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .footer-meta {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .footer-divider {
+        padding: 0 24px;
+      }
+      .footer-bottom {
+        padding: 24px 24px;
+      }
+      .footer-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+      .footer-socials {
+        align-self: flex-start;
+      }
+    }
+
+    .footer-copy {
+      font-size: 16.5px;
+      color: var(--muted);
+    }
+    .footer-copy a {
+      color: var(--text);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      transition: border-color .18s, color .18s;
+    }
+    .footer-copy a:hover { color: var(--accent); border-color: var(--accent); }
+
+    .footer-meta {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .footer-legal {
+      display: flex;
+      gap: 16px;
+    }
+    .footer-legal a {
+      font-size: 16px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .18s;
+    }
+    .footer-legal a:hover { color: var(--text); }
+
+    .footer-socials {
+      display: flex;
+      gap: 10px;
+    }
+    .social-btn {
+      width: 34px; height: 34px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      color: var(--muted);
+      transition: border-color .18s, color .18s, transform .15s;
+      position: relative;
+    }
+    .social-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .social-btn svg { width: 15px; height: 15px; fill: currentColor; }
+
+    /* tooltip */
+    .social-btn .tooltip {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      background: #1e2a3a;
+      color: white;
+      font-size: 12px;
+      letter-spacing: .5px;
+      white-space: nowrap;
+      padding: 5px 9px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .18s, transform .18s;
+    }
+    .social-btn .tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%; left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #1e2a3a;
+    }
+    .social-btn:hover .tooltip {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* status dot */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: .5px;
+    }
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: .4; } 100% { opacity: 1; } }
+
+    /* tiny extra: ensure footer background and text consistent */
+    footer, .footer-top, .footer-bottom, .footer-divider {
+      background: transparent;  /* let footer background show */
+    }
+
+    /* make sure no extra min-height or margin pushes footer */
+    body > footer {
+      margin-top: auto;         /* flex column: pushes footer to bottom if content is short */
+    }

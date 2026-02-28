@@ -14,6 +14,7 @@ namespace ASPWebApp.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Media> Media { get; set; }
+        public DbSet<Technology> Technologies { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,11 +37,6 @@ namespace ASPWebApp.Data
             };
 
             modelBuilder.Entity<User>().HasData(admin);
-
-            modelBuilder.Entity<User>()
-            .HasOne(u => u.ProfileImage)
-            .WithOne(m => m.User)
-            .HasForeignKey<Media>(m => m.UserId);
 
         }
     }

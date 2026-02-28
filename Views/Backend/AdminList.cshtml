@@ -6,7 +6,6 @@
 }
 
 <style>
-    /* ── Table reset — no borders ── */
     #adminTable,
     #adminTable th,
     #adminTable td {
@@ -26,7 +25,6 @@
         background: rgba(37, 99, 235, 0.04);
     }
 
-    /* ── Toolbar ── */
     .table-toolbar {
         display: flex;
         align-items: center;
@@ -36,7 +34,6 @@
         flex-wrap: wrap;
     }
 
-    /* ── thead label ── */
     #adminTable thead th {
         font-size: 0.72rem;
         font-weight: 600;
@@ -52,11 +49,16 @@
         font-size: 0.9rem;
         color: #374151;
     }
+
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
 </style>
 
 <div class="d-flex flex-column min-vh-100">
     <main class="flex-fill">
-        <div class="container my-4">
+        <div class="container-fluid px-3 px-md-4 my-4">
 
             <div class="table-toolbar">
                 <div class="d-flex align-items-center gap-2">
@@ -66,51 +68,53 @@
                 </div>
             </div>
 
-            <table id="adminTable" class="table table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th style="width:160px;">Actions</th>
-                    </tr>
-                </thead>
+            <div class="table-responsive">
+                <table id="adminTable" class="table table-hover w-100">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th style="width:160px;">Actions</th>
+                        </tr>
+                    </thead>
 
-                <tbody>
-                    @if (Model != null && Model.Any())
-                    {
-                        foreach (var admin in Model)
+                    <tbody>
+                        @if (Model != null && Model.Any())
                         {
-                            <tr data-id="@admin.Id">
-                                <td>@admin.Name</td>
-                                <td>@admin.Email</td>
-                                <td>
-                                    <a asp-action="EditAdmin" asp-route-id="@admin.Id"
-                                       class="btn btn-warning btn-sm me-1"
-                                       data-bs-toggle="tooltip" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
+                            foreach (var admin in Model)
+                            {
+                                <tr data-id="@admin.Id">
+                                    <td>@admin.Name</td>
+                                    <td>@admin.Email</td>
+                                    <td>
+                                        <a asp-action="EditAdmin" asp-route-id="@admin.Id"
+                                           class="btn btn-warning btn-sm me-1"
+                                           data-bs-toggle="tooltip" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
 
-                                    <form method="post" asp-controller="Backend" asp-action="Delete"
-                                          asp-route-id="@admin.Id" class="d-inline delete-form">
-                                        <input type="hidden" name="id" value="@admin.Id" />
-                                        <button type="button" class="btn btn-danger btn-sm"
-                                                data-bs-toggle="tooltip" title="Delete"
-                                                onclick="showDeleteModal(this.closest('form'))">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
+                                        <form method="post" asp-controller="Backend" asp-action="Delete"
+                                              asp-route-id="@admin.Id" class="d-inline delete-form">
+                                            <input type="hidden" name="id" value="@admin.Id" />
+                                            <button type="button" class="btn btn-danger btn-sm"
+                                                    data-bs-toggle="tooltip" title="Delete"
+                                                    onclick="showDeleteModal(this.closest('form'))">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">No admins found.</td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="4" class="text-center py-4 text-muted">No admins found.</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
 
             <partial name="Partials/_DeleteModel" />
 
@@ -121,6 +125,8 @@
 @section Scripts {
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
 
     <script>
         $(document).ready(function () {
@@ -131,6 +137,7 @@
                 ordering: true,
                 info: true,
                 autoWidth: false,
+                responsive: true,   // 👈 enable responsive
                 pageLength: 10,
                 language: {
                     paginate: { previous: "<", next: ">" }
@@ -140,6 +147,5 @@
             const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
             tooltips.forEach(el => new bootstrap.Tooltip(el));
         });
-
     </script>
 }
