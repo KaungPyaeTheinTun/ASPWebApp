@@ -32,7 +32,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddScoped(typeof(BaseInterface<>), typeof(BaseRepository<>));
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+builder.Services.AddScoped(typeof(IBaseService<>), typeof(CommonService<>));
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<UserInterface, UserRepository>();
 builder.Services.AddScoped<IMediaService, MediaService>();

@@ -1,30 +1,28 @@
 using ASPWebApp.Models;
 using ASPWebApp.Repositories.Interfaces;
 using ASPWebApp.Services.Interfaces;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace ASPWebApp.Services.Implementations
 {
-    public class TechnologyService 
-        : CommonService<Technology>, ITechnologyService
+    public class TechnologyService : CommonService<Technology>, ITechnologyService
     {
-        private readonly ITechnologyRepository _techRepo;
-
-        public TechnologyService(ITechnologyRepository repo) : base(repo)
+        public TechnologyService(IBaseRepository<Technology> repo): base(repo)
         {
-            _techRepo = repo; 
         }
 
         public List<Technology> GetAllWithMedia()
         {
-            return _techRepo.QueryWithMedia().ToList();
+            return _repo.GetAll()
+                .Include(t => t.Media)
+                .ToList();
         }
 
         public Technology? GetByIdWithMedia(int id)
         {
-            return _techRepo.QueryWithMedia()
-                            .FirstOrDefault(t => t.Id == id);
+            return _repo.GetAll()
+                .Include(t => t.Media)
+                .FirstOrDefault(t => t.Id == id);
         }
     }
 }

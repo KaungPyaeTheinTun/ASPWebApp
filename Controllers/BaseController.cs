@@ -1,6 +1,5 @@
 using ASPWebApp.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using ASPWebApp.Models;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace ASPWebApp.Controllers
@@ -8,120 +7,97 @@ namespace ASPWebApp.Controllers
     public class BaseController<T> : Controller where T : class
     {
         protected readonly IUserService _userService;
+        protected readonly IBaseService<T> _service;
 
-        public BaseController(IUserService userService)
+        public BaseController(
+            IUserService userService,
+            IBaseService<T> service)
         {
             _userService = userService;
+            _service = service;
         }
 
-        // --- ESSENTIAL SESSION/USER METHODS ---
-        protected bool IsAdmin() => HttpContext.Session.GetString("UserRole") == "1";
+        protected bool IsAdmin() =>
+            HttpContext.Session.GetString("UserRole") == "1";
 
         protected IActionResult? RequireAdmin()
         {
             if (!IsAdmin())
                 return RedirectToAction("Index", "Home");
-            return null;
-        }
 
-        protected User? GetCurrentUser()
-        {
-            var email = HttpContext.Session.GetString("UserEmail");
-            return string.IsNullOrEmpty(email) ? null : _userService.GetByEmail(email);
+            return null;
         }
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            var currentUser = GetCurrentUser();
-            if (currentUser != null)
+            var email = HttpContext.Session.GetString("UserEmail");
+
+            if (!string.IsNullOrEmpty(email))
             {
-                ViewData["Username"] = currentUser.Name;
-                ViewData["Email"] = currentUser.Email;
-                ViewData["ProfileImagePath"] = currentUser.ProfileImage?.FilePath ?? "/images/_.jpeg";
+                var user = _userService.GetByEmail(email);
+
+                if (user != null)
+                {
+                    ViewData["Username"] = user.Name;
+                    ViewData["Email"] = user.Email;
+                    ViewData["ProfileImagePath"] = user.ProfileImage?.FilePath ?? "/images/_.jpeg";
+                }
             }
 
             base.OnActionExecuting(context);
         }
 
-        protected void SetTempData(string key, string message) => TempData[key] = message;
+        protected void SetTempData(string key, string message)
+        {
+            TempData[key] = message;
+        }
 
-        // --- GENERIC CRUD METHODS ---
-        // List all items
-        protected IActionResult ListItems(Func<List<T>> getAllFunc)
+        protected IActionResult ListItems()
         {
             var check = RequireAdmin();
             if (check != null) return check;
 
-            var items = getAllFunc();
+            var items = _service.GetAll();
             return View(items);
         }
 
-        // Show create page
-        protected IActionResult CreateItemView()
+        protected IActionResult CreateItem(T entity)
         {
             var check = RequireAdmin();
             if (check != null) return check;
-            return View();
+
+            _service.Create(entity);
+
+            SetTempData("Success", "Created successfully");
+            return RedirectToAction("Index");
         }
 
-        // Handle create post
-        protected IActionResult CreateItemPost(Func<bool> createFunc, string successMessage, string redirectAction = "Index")
+        protected IActionResult EditItem(T entity)
         {
             var check = RequireAdmin();
             if (check != null) return check;
 
-            if (!createFunc())
-            {
-                SetTempData("Error", "Unable to create item.");
-                return View();
-            }
+            _service.Update(entity);
 
-            SetTempData("Success", successMessage);
-            return RedirectToAction(redirectAction);
+            SetTempData("Success", "Updated successfully");
+            return RedirectToAction("Index");
         }
 
-        // Show edit page
-        protected IActionResult EditItemView(Func<int, T?> getByIdFunc, int id)
+        protected IActionResult DeleteItem(int id)
         {
             var check = RequireAdmin();
             if (check != null) return check;
 
-            var item = getByIdFunc(id);
-            if (item == null) return NotFound();
+            var entity = _service.GetById(id);
 
-            return View(item);
-        }
+            if (entity == null)
+                return NotFound();
 
-        // Handle edit post
-        protected IActionResult EditItemPost(Func<bool> updateFunc, T model, string successMessage, string redirectAction = "Index")
-        {
-            var check = RequireAdmin();
-            if (check != null) return check;
+            _service.Delete(entity);
 
-            if (!updateFunc())
-            {
-                SetTempData("Error", "Unable to update item.");
-                return View(model);
-            }
+            SetTempData("Success", "Deleted successfully");
 
-            SetTempData("Success", successMessage);
-            return RedirectToAction(redirectAction);
-        }
-
-        // Handle delete
-        protected IActionResult DeleteItem(Func<int, (bool Success, string Error)> deleteFunc, int id)
-        {
-            var check = RequireAdmin();
-            if (check != null) return check;
-
-            var result = deleteFunc(id);
-            if (!result.Success)
-                SetTempData("Error", result.Error);
-            else
-                SetTempData("Success", "Deleted successfully.");
-
-            var referer = Request.Headers["Referer"].ToString();
-            return !string.IsNullOrEmpty(referer) ? Redirect(referer) : RedirectToAction("Index");
+            return RedirectToAction("Index");
         }
     }
 }

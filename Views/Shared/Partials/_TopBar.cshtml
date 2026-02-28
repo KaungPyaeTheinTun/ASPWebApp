@@ -87,7 +87,7 @@
               <span class="absolute -inset-1.5"></span>
               <span class="sr-only">Open user menu</span>
               <img
-                src="@ViewData["ProfileImagePath"]"
+                src="@(ViewData["ProfileImagePath"] ?? "/images/_.jpeg")"
                 alt="Profile" 
                 class="size-8 rounded-full outline outline-1 -outline-offset-1 outline-white/10" />
               <span class="pl-1 text-white">@ViewData["Username"]</span>

@@ -13,7 +13,8 @@ namespace ASPWebApp.Controllers
 {
     public class AuthController : BaseController<User>
     {
-        public AuthController(IUserService userService) : base(userService) { }
+        public AuthController(IUserService userService, IBaseService<User> commonService)
+            : base(userService, commonService) { }
 
         // --- LOGIN ---
         public IActionResult Login() => View();
@@ -38,12 +39,12 @@ namespace ASPWebApp.Controllers
 
             SetTempData("Success", "Welcome, " + user.Name);
 
-            if (user.RoleId == 1)
-                return RedirectToAction("index", "Backend");
-
-            return RedirectToAction("Index", "Home");
+            return user.RoleId == 1 
+                ? RedirectToAction("Index", "Backend") 
+                : RedirectToAction("Index", "Home");
         }
 
+        // --- GOOGLE LOGIN ---
         public IActionResult GoogleLogin()
         {
             var properties = new AuthenticationProperties
@@ -54,23 +55,21 @@ namespace ASPWebApp.Controllers
             return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
 
-        // Login with google
         public async Task<IActionResult> GoogleResponse()
         {
-            var result = await HttpContext.AuthenticateAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme);
-
-            var claims = result.Principal.Identities
-                .FirstOrDefault()?.Claims;
+            var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var claims = result.Principal?.Identities.FirstOrDefault()?.Claims;
 
             var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
 
-            // Save to session
-            HttpContext.Session.SetString("UserName", name ?? "");
-            HttpContext.Session.SetString("UserEmail", email ?? "");
+            if (!string.IsNullOrEmpty(email))
+            {
+                HttpContext.Session.SetString("UserEmail", email);
+                HttpContext.Session.SetString("UserName", name ?? "");
+                SetTempData("Success", "Welcome, Google User, " + name);
+            }
 
-            SetTempData("Success", "Welcome, Google User, " + name);
             return RedirectToAction("Index", "Home");
         }
 
@@ -115,7 +114,6 @@ namespace ASPWebApp.Controllers
                 return View(model);
             }
 
-            // Generate OTP
             var otp = new Random().Next(100000, 999999).ToString();
             HttpContext.Session.SetString("ForgotPasswordOTP", otp);
             HttpContext.Session.SetString("ForgotPasswordEmail", model.Email);
@@ -155,10 +153,7 @@ namespace ASPWebApp.Controllers
         }
 
         // --- VERIFY OTP ---
-        public IActionResult VerifyOtp()
-        {
-            return View(new VerifyOtpViewModel { OTP = "" });
-        }
+        public IActionResult VerifyOtp() => View(new VerifyOtpViewModel { OTP = "" });
 
         [HttpPost]
         public IActionResult VerifyOtp(VerifyOtpViewModel model)
@@ -216,7 +211,7 @@ namespace ASPWebApp.Controllers
             }
 
             user.Password = new PasswordHasher<User>().HashPassword(user, model.NewPassword);
-            _userService.UpdateUser(user.Id, user.Name, user.Email, user.RoleId, out _);
+            _userService.UpdatePassword(user.Id, user.Password);
 
             SetTempData("Success", "Password reset successfully!");
             return RedirectToAction("Login");

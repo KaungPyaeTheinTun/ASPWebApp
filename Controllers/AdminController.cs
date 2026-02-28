@@ -4,7 +4,6 @@ using ASPWebApp.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using ASPWebApp.Helpers;
-using System.IO;
 
 namespace ASPWebApp.Controllers
 {
@@ -12,8 +11,11 @@ namespace ASPWebApp.Controllers
     {
         private readonly IMediaService _mediaService;
 
-        public AdminController(IUserService userService, IMediaService mediaService)
-            : base(userService)
+        public AdminController(
+            IUserService userService,
+            IBaseService<User> userCommonService,
+            IMediaService mediaService)
+            : base(userService, userCommonService)
         {
             _mediaService = mediaService;
         }
@@ -61,10 +63,7 @@ namespace ASPWebApp.Controllers
                 }
                 else
                 {
-                    user.ProfileImage = _mediaService.UpdateFile(
-                        model.ProfileImageFile,
-                        user.ProfileImage
-                    );
+                    user.ProfileImage = _mediaService.UpdateFile(model.ProfileImageFile, user.ProfileImage);
                 }
             }
 
@@ -83,7 +82,6 @@ namespace ASPWebApp.Controllers
             return RedirectToAction("Profile");
         }
 
-        // POST: /Admin/ChangePassword
         [HttpPost]
         public IActionResult ChangePassword(AdminProfileViewModel model)
         {
@@ -94,7 +92,6 @@ namespace ASPWebApp.Controllers
             if (user == null)
                 return RedirectToAction("Login", "Auth");
 
-            // Protect against empty submission
             if (string.IsNullOrWhiteSpace(model.Password.CurrentPassword) ||
                 string.IsNullOrWhiteSpace(model.Password.NewPassword) ||
                 string.IsNullOrWhiteSpace(model.Password.ConfirmPassword))
@@ -104,13 +101,7 @@ namespace ASPWebApp.Controllers
             }
 
             var hasher = new PasswordHasher<User>();
-
-            // Verify current password
-            var result = hasher.VerifyHashedPassword(
-                user,
-                user.Password,
-                model.Password.CurrentPassword
-            );
+            var result = hasher.VerifyHashedPassword(user, user.Password, model.Password.CurrentPassword);
 
             if (result == PasswordVerificationResult.Failed)
             {
@@ -118,26 +109,31 @@ namespace ASPWebApp.Controllers
                 return RedirectToAction("Profile");
             }
 
-            // Check confirm password
             if (model.Password.NewPassword != model.Password.ConfirmPassword)
             {
                 TempData["Error"] = "Passwords do not match.";
                 return RedirectToAction("Profile");
             }
 
-            // Validate new password
             if (!PasswordHelper.IsValid(model.Password.NewPassword, out string validationError))
             {
                 TempData["Error"] = validationError;
                 return RedirectToAction("Profile");
             }
 
-            // Hash new password and save
             user.Password = hasher.HashPassword(user, model.Password.NewPassword);
             _userService.UpdatePassword(user.Id, user.Password);
 
             TempData["Success"] = "Password changed successfully.";
             return RedirectToAction("Profile");
+        }
+
+        // Helper to get current logged-in user from session
+        private User? GetCurrentUser()
+        {
+            var email = HttpContext.Session.GetString("UserEmail");
+            if (string.IsNullOrEmpty(email)) return null;
+            return _userService.GetByEmail(email);
         }
     }
 }

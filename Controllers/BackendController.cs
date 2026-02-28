@@ -7,12 +7,15 @@ namespace ASPWebApp.Controllers
 {
     public class BackendController : BaseController<User>
     {
-        public BackendController(IUserService userService) : base(userService) { }
+        public BackendController(IUserService userService, IBaseService<User> commonService)
+            : base(userService, commonService) { }
 
-        public IActionResult index()
+        // --- DASHBOARD ---
+        public IActionResult Index()
         {
             var currentUser = GetCurrentUser();
-            if (currentUser == null) return RedirectToAction("Login", "Auth");
+            if (currentUser == null)
+                return RedirectToAction("Login", "Auth");
 
             ViewData["Username"] = currentUser.Name;
             ViewData["Email"] = currentUser.Email;
@@ -20,45 +23,88 @@ namespace ASPWebApp.Controllers
             return View("Dashboard");
         }
 
-        // --- USERS ---
+        // --- USERS LIST ---
         public IActionResult UserList()
-            => ListItems(() => _userService.GetAllByRoles(2));
+        {
+            var users = _userService.GetAllByRoles(2);
+            return View("UserList", users);
+        }
 
+        // --- ADMINS LIST ---
         public IActionResult AdminList()
-            => ListItems(() => _userService.GetAllByRoles(1));
+        {
+            var admins = _userService.GetAllByRoles(1);
+            return View("AdminList", admins);
+        }
 
-        public IActionResult CreateAdmin()
-            => CreateItemView();
+        // --- CREATE ADMIN ---
+        public IActionResult CreateAdmin() => View();
 
         [HttpPost]
         public IActionResult CreateAdmin(RegisterViewModel model)
-            => CreateItemPost(
-                () => _userService.CreateUser(model.Name, model.Email, model.Password, 1, out _),
-                "Admin created successfully.",
-                "AdminList"
-            );
+        {
+            if (!ModelState.IsValid)
+                return View(model);
 
+            if (!_userService.CreateUser(model.Name, model.Email, model.Password, 1, out string error))
+            {
+                TempData["Error"] = error;
+                return View(model);
+            }
+
+            TempData["Success"] = "Admin created successfully.";
+            return RedirectToAction("AdminList");
+        }
+
+        // --- EDIT ADMIN ---
         public IActionResult EditAdmin(int id)
-            => EditItemView(_userService.GetById, id);
+        {
+            var admin = _userService.GetById(id);
+            if (admin == null)
+                return NotFound();
+
+            return View(admin);
+        }
 
         [HttpPost]
         public IActionResult EditAdmin(User user)
-            => EditItemPost(
-                () => _userService.UpdateUser(user.Id, user.Name, user.Email, 1, out _),
-                user,
-                "Admin updated successfully.",
-                "AdminList"
-            );
+        {
+            if (!_userService.UpdateUser(user.Id, user.Name, user.Email, 1, out string error))
+            {
+                TempData["Error"] = error;
+                return View(user);
+            }
 
+            TempData["Success"] = "Admin updated successfully.";
+            return RedirectToAction("AdminList");
+        }
+
+        // --- DELETE ADMIN ---
         [HttpPost]
         public IActionResult Delete(int id)
         {
-            var currentUser = HttpContext.Session.GetString("UserName");
-            return DeleteItem(itemId =>
+            var currentUserName = HttpContext.Session.GetString("UserName");
+
+            if (!_userService.DeleteUser(id, currentUserName, out string error))
             {
-                var success = _userService.DeleteUser(itemId, currentUser, out string error);
-                return (success, error);
-            }, id);
+                TempData["Error"] = error;
+            }
+            else
+            {
+                TempData["Success"] = "Deleted successfully.";
+            }
+
+            return RedirectToAction("AdminList");
+        }
+
+        // --- HELPER ---
+        private User? GetCurrentUser()
+        {
+            var email = HttpContext.Session.GetString("UserEmail");
+            if (string.IsNullOrEmpty(email))
+                return null;
+
+            return _userService.GetByEmail(email);
         }
     }
 }

@@ -2,13 +2,8 @@ using ASPWebApp.Models;
 
 namespace ASPWebApp.Services.Interfaces
 {
-    public interface ITechnologyService
+    public interface ITechnologyService : IBaseService<Technology>
     {
-        List<Technology> GetAll();
-        Technology? GetById(int id);
-        void Create(Technology tech);
-        void Update(Technology tech);
-        void Delete(Technology tech);
         List<Technology> GetAllWithMedia();
         Technology? GetByIdWithMedia(int id);
     }

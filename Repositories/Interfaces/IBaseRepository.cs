@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ASPWebApp.Repositories.Interfaces
 {
-    public interface BaseInterface<T> where T : class
+    public interface IBaseRepository<T> where T : class
     {
         IQueryable<T> GetAll();
         T? GetById(int id);

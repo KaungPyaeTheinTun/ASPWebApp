@@ -7,22 +7,24 @@ using ASPWebApp.Helpers;
 
 namespace ASPWebApp.Services.Implementations
 {
-    public class UserService : IUserService
+    public class UserService : CommonService<User>, IUserService
     {
         private readonly UserInterface _userRepo;
         private readonly PasswordHasher<User> _passwordHasher;
 
-        public UserService(UserInterface userRepo)
+        public UserService(UserInterface userRepo) 
+            : base(userRepo) // pass repo to CommonService
         {
             _userRepo = userRepo;
             _passwordHasher = new PasswordHasher<User>();
         }
 
+        // --- User-specific methods ---
         public List<User> GetAllByRoles(int? roleId = null)
         {
             if (roleId.HasValue)
                 return _userRepo.GetByRoleId(roleId.Value);
-                return _userRepo.GetAll().ToList();
+            return _userRepo.GetAll().ToList();
         }
 
         public bool CreateUser(string name, string email, string password, int roleId, out string error)
@@ -50,7 +52,8 @@ namespace ASPWebApp.Services.Implementations
 
             user.Password = _passwordHasher.HashPassword(user, password);
 
-            _userRepo.Create(user);
+            // Use generic Create from CommonService
+            Create(user);
             return true;
         }
 
@@ -59,13 +62,15 @@ namespace ASPWebApp.Services.Implementations
             error = "";
             try
             {
-                var user = _userRepo.GetById(id);
+                var user = GetById(id); // Generic method from CommonService
                 if (user == null) { error = "User not found"; return false; }
 
                 user.Name = name;
                 user.Email = email;
                 user.RoleId = roleId;
-                _userRepo.Update(user);
+
+                // Generic Update from CommonService
+                Update(user);
                 return true;
             }
             catch (System.Exception ex)
@@ -77,11 +82,11 @@ namespace ASPWebApp.Services.Implementations
 
         public bool UpdatePassword(int userId, string hashedPassword)
         {
-            var user = _userRepo.GetById(userId);
+            var user = GetById(userId);
             if (user == null) return false;
 
             user.Password = hashedPassword;
-            _userRepo.Update(user);   // use repository update
+            Update(user); // Generic Update
             return true;
         }
 
@@ -90,11 +95,11 @@ namespace ASPWebApp.Services.Implementations
             error = "";
             try
             {
-                var user = _userRepo.GetById(id);
+                var user = GetById(id);
                 if (user == null) { error = "User not found"; return false; }
                 if (user.Name == currentUserName) { error = "You cannot delete yourself"; return false; }
 
-                _userRepo.Delete(user);
+                Delete(user); // Generic Delete
                 return true;
             }
             catch (System.Exception ex)
@@ -105,8 +110,6 @@ namespace ASPWebApp.Services.Implementations
         }
 
         public User? GetByEmail(string email) => _userRepo.GetByEmail(email);
-
-        public User? GetById(int id) => _userRepo.GetById(id);
 
         public bool VerifyPassword(User user, string password)
         {
