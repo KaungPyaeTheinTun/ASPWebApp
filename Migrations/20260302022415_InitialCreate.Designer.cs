@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASPWebApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260223103023_CreateMediaTable")]
-    partial class CreateMediaTable
+    [Migration("20260302022415_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,13 +48,7 @@ namespace ASPWebApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("Media");
                 });
@@ -88,6 +82,42 @@ namespace ASPWebApp.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ASPWebApp.Models.Technology", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("MediaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MediaId");
+
+                    b.ToTable("Technologies");
+                });
+
             modelBuilder.Entity("ASPWebApp.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -99,6 +129,9 @@ namespace ASPWebApp.Migrations
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("MediaId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -112,6 +145,8 @@ namespace ASPWebApp.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MediaId");
 
                     b.HasIndex("RoleId");
 
@@ -128,24 +163,28 @@ namespace ASPWebApp.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ASPWebApp.Models.Media", b =>
+            modelBuilder.Entity("ASPWebApp.Models.Technology", b =>
                 {
-                    b.HasOne("ASPWebApp.Models.User", "User")
-                        .WithOne("ProfileImage")
-                        .HasForeignKey("ASPWebApp.Models.Media", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("ASPWebApp.Models.Media", "Media")
+                        .WithMany()
+                        .HasForeignKey("MediaId");
 
-                    b.Navigation("User");
+                    b.Navigation("Media");
                 });
 
             modelBuilder.Entity("ASPWebApp.Models.User", b =>
                 {
+                    b.HasOne("ASPWebApp.Models.Media", "ProfileImage")
+                        .WithMany()
+                        .HasForeignKey("MediaId");
+
                     b.HasOne("ASPWebApp.Models.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ProfileImage");
 
                     b.Navigation("Role");
                 });
@@ -153,11 +192,6 @@ namespace ASPWebApp.Migrations
             modelBuilder.Entity("ASPWebApp.Models.Role", b =>
                 {
                     b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("ASPWebApp.Models.User", b =>
-                {
-                    b.Navigation("ProfileImage");
                 });
 #pragma warning restore 612, 618
         }
